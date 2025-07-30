@@ -219,9 +219,9 @@ void loop() {
 
 
             client.print("<body>");
-            client.print("<div class="container">");
+            client.print("<div class="container">"); //div container abre
 
-            client.print("<div class="visor">");
+            client.print("<div class="visor">"); //div visor abre
             client.print("<hr>");
             client.print("<div class="temperatura"><h1 class="visor-text" id="temperatura"></h1></div>");
             client.print("<hr>");
@@ -229,9 +229,9 @@ void loop() {
             client.print("<hr>");
             client.print("<div class="row"><h3 id="titleCompressor"></h3><h3 id="compressor"></h3></div>");
             client.print("<hr>");
-            client.print("</div>");
+            client.print("</div>"); //div visor fecha
 
-            client.print("<div class="containerButtons">");
+            client.print("<div class="containerButtons">"); //div container buttons abre
 
             client.print("<h4>ligar/desligar</h4>");
             client.print("<div class="containerBtn">");
@@ -277,40 +277,48 @@ void loop() {
 
             client.print("</div>");
 
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
+            /********************************VELOCIDADES****************************************/
+            client.print("<h4>Velocidade</h4>");
+            client.print("<div class="containerBtn">");
+            client.print("<button class="btn" onclick="diminuirVelocidade()">");
+            client.print("<svg width="60px" height="60px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">");
+            client.print("<g id="SVGRepo_bgCarrier" stroke-width="0"></g>");
+            client.print("<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>");
+            client.print("<g id="SVGRepo_iconCarrier"><path d="M7 10L12 15L17 10" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></g>");
+            client.print("</svg>");
+            client.print("</button>");
+            client.print("<button class="btn" onclick="aumentarVelocidade()">");
+            client.print("<svg width="60px" height="60px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">");
+            client.print("<g id="SVGRepo_bgCarrier" stroke-width="0"></g>");
+            client.print("<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>");
+            client.print("<g id="SVGRepo_iconCarrier"><path d="M17 15L12 10L7 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></g>");
+            client.print("</svg>");
+            client.print("</button>");
+            client.print("</div>");
+            client.print("</div>"); //div container buttons fecha
+            client.print("</div>"); //div container fecha
 
-            client.print("");
+            client.print("<p class="text">by - gabreu</p>"); //assinatura
 
-            client.print("");
-            client.print("");
-
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-
-            client.print("");
-            client.print("");
-
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
-            client.print("");
+            /**************************JAVASCRIPT**************************/
+            client.print("<script>");
+            client.print("let arCondicionado = {ligado: false,temperatura: 27,velocidade: 1,modo: 'frio',timer: 0,compressor: 'ligado',}");
+            client.print("let visor = document.getElementById('temperatura');");
+            client.print("let titleVelocidade = document.getElementById('titleVelocidade');");
+            client.print("let velocidade = document.getElementById('velocidade');");
+            client.print("let titleCompressor = document.getElementById('titleCompressor');");
+            client.print("let compressor = document.getElementById('compressor');");
+            client.print("function ligarDesligar() {");
+            client.print("if ((visor.textContent).length === 0) {");
+            client.print("console.log(arCondicionado.ligado = true)");
+            client.print("atualizarVisor()");
+            client.print("} else {");
+            client.print("console.log(arCondicionado.ligado = false)");
+            client.print("atualizarVisor()");
+            client.print("}");
+            client.print("console.log(visor.textContent)")
+            client.print("}");
+        
             client.print("");
             client.print("");
             
