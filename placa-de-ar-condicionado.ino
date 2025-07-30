@@ -217,7 +217,8 @@ void loop() {
             client.print("</style>");
             client.print("</head>");
 
-
+            //FIM DO CABECALHO
+            //INICIA BODY
             client.print("<body>");
             client.print("<div class="container">"); //div container abre
 
@@ -316,7 +317,7 @@ void loop() {
             client.print("console.log(arCondicionado.ligado = false)");
             client.print("atualizarVisor()");
             client.print("}");
-            client.print("console.log(visor.textContent)")
+            client.print("console.log(visor.textContent)");
             client.print("}");
         
             client.print("");
