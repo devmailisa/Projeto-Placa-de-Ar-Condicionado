@@ -1,1 +1,1 @@
-# Projeto-Placa-de-Ar-Condicionado
+# Projeto PEDITEC-EAD 2025 Placa de Ar Condicionado Usando Esp32 e HTTP
