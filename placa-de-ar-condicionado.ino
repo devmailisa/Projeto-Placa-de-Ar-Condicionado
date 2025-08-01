@@ -1,10 +1,6 @@
 #include <WiFi.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
-#include <iostream>
-#include <string>
-
-using namespace std;
 
 #define pino_compressor 23
 #define pino_sensor_temperatura 21
@@ -37,7 +33,7 @@ bool arCondicionadoLigado = false;
 OneWire onewire(pino_sensor_temperatura);
 DallasTemperature sensor(&onewire);
 
-    string respostaHTML = "
+    String respostaHTML = "
 <!DOCTYPE html> \
  \
 <html lang="en"> \
