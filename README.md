@@ -26,7 +26,7 @@ O sistema proposto utiliza um **ESP32** para controlar o funcionamento de um ar-
      - Liga ventilador alta (GPIO 18)  
    - Se a temperatura for **normalizada**:  
      - Mantém apenas ventilador baixa (GPIO 19)  
-     - Desliga compressor **após 90 s sem mudança de estado**  
+     - Se o compressor estiver ligado e o seu estado não tiver sido alterado em **menos de 90s**,deve ser desligado.
 
 ⚡ O atraso de 90 segundos evita ciclos rápidos de liga/desliga, protegendo o compressor.
 
@@ -51,7 +51,6 @@ A comunicação é feita via **servidor HTTP local**, sem necessidade de serviç
 ---
 
 ## 📚 Objetivos Educacionais
-Este protótipo serve como **recurso didático em EaD**, permitindo:  
 - Exploração prática de conceitos de **IoT, automação e controle**.  
 - Experimentos remotos com monitoramento de variáveis ambientais.  
 - Aprendizagem ativa em disciplinas de Engenharia e áreas correlatas.
@@ -60,7 +59,6 @@ Este protótipo serve como **recurso didático em EaD**, permitindo:
 
 ## 🔮 Próximos Passos
 - Integração com banco de dados para registro histórico de temperaturas.  
-- Controle remoto via MQTT para múltiplos dispositivos.  
 - Adição de sensores extras (umidade, corrente elétrica, vibração).  
 
 ---
