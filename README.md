@@ -60,5 +60,3 @@ A comunicação é feita via **servidor HTTP local**, sem necessidade de serviç
 ## 🔮 Próximos Passos
 - Integração com banco de dados para registro histórico de temperaturas.  
 - Adição de sensores extras (umidade, corrente elétrica, vibração).  
-
----
