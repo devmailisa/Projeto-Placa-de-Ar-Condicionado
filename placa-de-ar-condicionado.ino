@@ -9,8 +9,8 @@
 
 
 
-const char* ssid = "brisa-2044881"; //ssid da rede
-const char* password =  "ur7nknzt"; //senha da rede
+const char* ssid = "SSID_REDE"; //ssid da rede
+const char* password =  "SENHA"; //senha da rede
 WiFiServer server(80);
 
 
