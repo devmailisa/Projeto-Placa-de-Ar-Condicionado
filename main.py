@@ -10,8 +10,8 @@ import onewire
 import ds18x20
 
 # ============ CONFIGURAÇÕES ============
-SSID = "brisa-2044881"
-PASSWORD = "ur7nknzt"
+SSID = "SEU_SSID"
+PASSWORD = "SENHA"
 
 GPIO_COMPRESSOR = 23          # relé do compressor (ativo em LOW)
 GPIO_VENT_BAIXO = 18          # relé/saída ventilador baixo
