@@ -7,31 +7,18 @@
 #define pino_ventilador_baixo 18
 #define pino_ventilador_alto 19
 
-const int intervalo_compressor = 90000; //milissegundos
 
-/*************************WiFi*************************/
+
 const char* ssid = "brisa-2044881"; //ssid da rede
 const char* password =  "ur7nknzt"; //senha da rede
+WiFiServer server(80);
 
-WiFiServer server(80); //Determina que a esp32 irá iniciar um servido Web que irá operar na porta 80 da rede WiFi
 
-float temperaturaDesejada = 20;
-float potenciaVentiladorDesejada = 0; //ventilador no modo baixo
 
-/*
-Estado de operacao do ventilador
-0 -> desligado
-1 -> baixo
-2 -> alto
-*/
-int ultimaTrocaCompressor = 0;
-bool compressorLigado = false;
-bool arCondicionadoLigado = false;
+
 
 OneWire onewire(pino_sensor_temperatura);
 DallasTemperature sensor(&onewire);
-
-/*************************TEMPERATURA*************************/
 
 float lerTemperatura() {
   sensor.requestTemperatures();
@@ -40,6 +27,8 @@ float lerTemperatura() {
   float temperatura = sensor.getTempC(sensor1Address);
   return temperatura;
 }
+
+float temperaturaDesejada = 20;
 
 void diminuirTemperatura(){
   if(temperaturaDesejada > 15){
@@ -53,9 +42,16 @@ void aumentarTemperatura(){
   }
 }
 
+
+
+
+
 /*************************COMPRESSOR*************************/
 //O relé do compressor tem a lógica invertida pois ele ativa no nível lógico LOW;
 //E desativa com o nível lógico HIGH.
+
+bool compressorLigado = false;
+
 void ligarCompressor(){
   digitalWrite(pino_compressor, LOW); 
   compressorLigado = true;
@@ -66,6 +62,12 @@ void desligarCompressor(){
   compressorLigado = false;
 }
 
+
+
+const int intervalo_compressor = 90000; //milissegundos
+int ultimaTrocaCompressor = 0;
+bool arCondicionadoLigado = false;
+
 bool trocarEstadoCompressor(int agora){
   if (agora - ultimaTrocaCompressor > intervalo_compressor){
     return true;
@@ -74,32 +76,28 @@ bool trocarEstadoCompressor(int agora){
   return false;
 }
 
-/*************************VENTILADORES*************************/
-void ventiladorDesligado(){
-  digitalWrite(pino_ventilador_baixo, LOW);
-  digitalWrite(pino_ventilador_alto, LOW);
-  
-  potenciaVentiladorDesejada = 0;
 
-  Serial.println("Ventilador: Desligado");
+
+
+
+
+
+/*************************VENTILADORES*************************/
+float potenciaVentiladorDesejada = 0; 
+
+void ventiladorDesligado(){
+  digitalWrite(pino_ventilador_baixo, HIGH);
+  digitalWrite(pino_ventilador_alto, HIGH);
 }
 
 void ventiladorBaixo(){
-  digitalWrite(pino_ventilador_baixo, HIGH);
-  digitalWrite(pino_ventilador_alto, LOW);
-
-  potenciaVentiladorDesejada = 1;
-
-  Serial.println("Ventilador: Baixo");
+  digitalWrite(pino_ventilador_baixo, LOW);
+  digitalWrite(pino_ventilador_alto, HIGH);
 }
 
 void ventiladorAlto(){
-  digitalWrite(pino_ventilador_baixo, LOW);
-  digitalWrite(pino_ventilador_alto, HIGH);
-
-  potenciaVentiladorDesejada = 2;
-
-  Serial.println("Ventilador: Alto");
+  digitalWrite(pino_ventilador_baixo, HIGH);
+  digitalWrite(pino_ventilador_alto, LOW);
 }
 
 /*********************ON/OFF*********************/
@@ -112,14 +110,30 @@ void desligarArCondicionado(int agora){
   ventiladorDesligado();
 }
 
+
+
+
+
+void refrigerar(int agora){
+  if(!compressorLigado){
+    if(trocarEstadoCompressor(agora)){
+      ligarCompressor();
+    }
+  }
+}
+
+
+
+
 void setup() {
   pinMode(pino_compressor, OUTPUT);
   pinMode(pino_ventilador_baixo, OUTPUT);
   pinMode(pino_ventilador_alto, OUTPUT);
 
+  digitalWrite(pino_compressor, HIGH);
+  digitalWrite(pino_ventilador_baixo, HIGH);
+  digitalWrite(pino_ventilador_alto, HIGH);
   Serial.begin(115200);
-
-  desligarArCondicionado(0);
 
   //Inicia a conexão WiFi
   WiFi.begin(ssid, password);
@@ -137,51 +151,48 @@ void setup() {
 
 void loop() 
 {
-  unsigned long tempoDecorrido = millis();
-  if (arCondicionadoLigado)
+  float temperaturaAtual = lerTemperatura();
+  int agora = millis();
+
+  if(arCondicionadoLigado)
   {
-    float temperaturaEvaporador = lerTemperatura();
-
-    if(temperaturaEvaporador > temperaturaDesejada && trocarEstadoCompressor(tempoDecorrido)){
-      ligarCompressor();
-      ultimaTrocaCompressor = tempoDecorrido;
-    } else if(temperaturaEvaporador <= temperaturaDesejada && trocarEstadoCompressor(tempoDecorrido)){
-      desligarCompressor();
-      ultimaTrocaCompressor = tempoDecorrido;
+    if(temperaturaAtual > temperaturaDesejada){
+      refrigerar(agora);
+    }else{
+      if(compressorLigado && trocarEstadoCompressor(agora)){
+        desligarCompressor();
+      }
     }
 
-    if(potenciaVentiladorDesejada == 1){
-      ventiladorBaixo();
-    } else if(potenciaVentiladorDesejada == 2){
+    if(potenciaVentiladorDesejada == 2){
       ventiladorAlto();
+    } else if(potenciaVentiladorDesejada == 1){
+      ventiladorBaixo();
+    } else if(potenciaVentiladorDesejada == 0){
+      ventiladorDesligado();
     }
-
-    Serial.print("Temperatura Desejada: ");
-    Serial.print(temperaturaDesejada);
-    Serial.print("°C | Temperatura do ambiente: ");
-    Serial.print(temperaturaEvaporador);
-    Serial.println("°C");
-    Serial.println();
-    Serial.print("Compressor: ");
-    Serial.println(compressorLigado ? "Ligado" : "Desligado");
-    Serial.print("Tempo decorrido: ");
-    Serial.println(tempoDecorrido);
-    Serial.println();
-  }else{
-    desligarArCondicionado(tempoDecorrido);
+  }else
+  {
+    desligarArCondicionado(agora);
   }
+
 
   WiFiClient client = server.available(); //Avalia se existe um cliente disponível para estabelecer a conexão
 
-  if (client){
+  if (client)
+  {
     Serial.println("Novo cliente conectado.");
     String currentLine = "";
-    while (client.connected()){
-      if (client.available()){
+    while (client.connected())
+    {
+      if (client.available())
+      {
         char c = client.read();
         Serial.write(c);
-        if (c == '\n') {
-          if (currentLine.length() == 0) {
+        if (c == '\n')
+        {
+          if (currentLine.length() == 0) 
+          {
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println();
@@ -234,6 +245,8 @@ void loop()
             client.print("<body>");
             client.print("<div class=\"main\">");
             client.print("<div class=\"display\">");
+            
+            
             if (arCondicionadoLigado)
             {
               client.print("<h1 id=\"on-off\">Ligado</h1>");
@@ -242,6 +255,7 @@ void loop()
             {
               client.print("<h1 id=\"on-off\">Desligado</h1>");
             }
+
             client.print("<div class=\"temperatura\">");
             client.print("<h1 id=\"temp\">");
             if (arCondicionadoLigado)
@@ -250,26 +264,31 @@ void loop()
             }
             else
             {
-              client.print("00");
+              client.print("--");
             }
             client.print("</h1>");
             client.print("<h1 id=\"celsius\">°C</h1>");
             client.print("<hr>");
-            client.print("<h1 class=\"textInfo\">Velocidade Atual: ");
-            if (arCondicionadoLigado)
+            client.print("<h1 class=\"textInfo\">Modo de Ventilação: ");
+            
+            if(arCondicionadoLigado)
             {
               if (potenciaVentiladorDesejada == 1)
               {
-                client.print("01");
-              }else if (potenciaVentiladorDesejada == 2)
+                client.print("Baixa");
+              }else if(potenciaVentiladorDesejada == 2)
               {
-                client.print("02");
+                client.print("Alta");
+              }else if(potenciaVentiladorDesejada == 0)
+              {
+                client.print("Desligado");
               }
             }
             else
             {
-              client.print("00");
+              client.print("Desligado");
             }
+
             client.print("</h1>");
             client.print("</div>"); //DIV TEMPERATURA
             client.print("</div>"); //DIV DISPLAY
@@ -283,6 +302,12 @@ void loop()
             client.print("</a>");
             client.print("</div>");
 
+            client.print("<div style='text-align:center; margin:20px;'>");
+            client.print("<a href=\"/info\" style='font-size:24px; color:white; text-decoration:none; background:#444; padding:10px 20px; border-radius:8px;'>");
+            client.print("Info.");
+            client.print("</a>");
+            client.print("</div>");
+
 
             client.print("<div class=\"aumentar\">");
             client.print("<a href=\"/mais\">");
@@ -293,7 +318,7 @@ void loop()
             client.print("</a>");
             client.print("</div>");
 
-            client.print("<div class=\"info-temp\">temp.</div>");//div info-temp abre e fecha
+            //client.print("<div class=\"info-temp\"></div>");//div info-temp abre e fecha
 
             client.print("<div class=\"diminuir\">"); //div botao diminuir
             client.print("<a href=\"/menos\">");
@@ -309,12 +334,20 @@ void loop()
             client.print("<div class=\"velocidades\">"); //v1
             client.print("<a href=\"/v1\" class=\"radio\">");
             client.print("<input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio1\">");
-            client.print("Velocidade 01");
+            client.print("Velocidade Baixa.");
             client.print("</a>");
             //v2
             client.print("<a href=\"/v2\" class=\"radio\">");
             client.print("<input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio2\" >");
-            client.print("Velocidade 02");
+            client.print("Velocidade Alta.");
+            client.print("</a>");
+            //v0
+            client.print("<a href=\"/v0\" class=\"radio\">");
+            client.print("<input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio2\" >");
+            client.print("Ventilador desligado.");
+            client.print("</a>");
+
+
 
             client.print("</div>"); //div velocidades
 
@@ -322,50 +355,68 @@ void loop()
             client.print("</html>");
 
             client.println();
+
             break;
-          } else {
+          } 
+          else 
+          {
             currentLine = "";
           }
-        } else if (c != '\r') {
+        }else if (c != '\r')
+        {
           currentLine += c;
         }
 
-        /*********************Botao ligar e desligar**********************/
-        if (currentLine.startsWith("GET /ligar-desligar")) { 
-
-          if(!arCondicionadoLigado){
-            potenciaVentiladorDesejada = 1;
-          }
-
+        if (currentLine.endsWith("GET /ligar-desligar")) 
+        { 
           arCondicionadoLigado = !arCondicionadoLigado;
         } 
 
-        /*********************Aumentar temperatura**********************/
-        if (currentLine.endsWith("GET /mais")) { 
+        if (currentLine.endsWith("GET /mais")) 
+        { 
           aumentarTemperatura();
         } 
 
-        /*********************Diminuir temperatura**********************/
-        if (currentLine.endsWith("GET /menos")) { 
+        if (currentLine.endsWith("GET /menos")) 
+        { 
           diminuirTemperatura();
         }
 
-        /*********************Diminuir temperatura**********************/
-        if (currentLine.endsWith("GET /v2")){
-          ventiladorAlto();
+        if (currentLine.endsWith("GET /v2"))
+        {
+          potenciaVentiladorDesejada = 2;
         }
 
-        /*********************Diminuir temperatura**********************/
-
-        if(currentLine.endsWith("GET /v1")){
-          ventiladorBaixo();
+        if(currentLine.endsWith("GET /v1"))
+        {
+          potenciaVentiladorDesejada = 1;
         }
 
+        if(currentLine.endsWith("GET /v0")){
+          potenciaVentiladorDesejada = 0;
+        }
+
+        if(currentLine.endsWith("GET /info")){
+          Serial.print("Temperatura Desejada: ");
+          Serial.print(temperaturaDesejada);
+          Serial.print("°C | Temperatura do ambiente: ");
+          Serial.print(temperaturaAtual);
+          Serial.println("°C");
+          Serial.println();
+          Serial.print("Compressor: ");
+          Serial.println(compressorLigado ? "Ligado" : "Desligado");
+          Serial.print("Tempo decorrido: ");
+          Serial.println(agora);
+          Serial.println();
+        }
+
+      }
     }
     client.stop();
-    Serial.println("Cliente Desconectado.");
+    Serial.println("Desconectado.");
   }
-}
 
-delay(500);
+
+
+  delay(500);
 }
