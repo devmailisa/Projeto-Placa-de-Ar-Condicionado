@@ -7,14 +7,9 @@
 #define pino_ventilador_baixo 18
 #define pino_ventilador_alto 19
 
-
-
 const char* ssid = "SSID_REDE"; //ssid da rede
 const char* password =  "SENHA"; //senha da rede
 WiFiServer server(80);
-
-
-
 
 
 OneWire onewire(pino_sensor_temperatura);
@@ -106,12 +101,12 @@ void desligarArCondicionado(int agora){
   if(trocarEstadoCompressor(agora)){
     desligarCompressor();
   }
-
+  
   ventiladorDesligado();
 }
 
-
-
+//Verifica se o usuário clicou no estado de "Ventilação desligada" naquele instante
+bool clicou = false;
 
 
 void refrigerar(int agora){
@@ -119,6 +114,10 @@ void refrigerar(int agora){
     if(trocarEstadoCompressor(agora)){
       ligarCompressor();
     }
+  }
+
+  if(potenciaVentiladorDesejada == 0 and !clicou){
+    potenciaVentiladorDesejada = 2;
   }
 }
 
@@ -367,6 +366,7 @@ void loop()
           currentLine += c;
         }
 
+        //Métodos 
         if (currentLine.endsWith("GET /ligar-desligar")) 
         { 
           arCondicionadoLigado = !arCondicionadoLigado;
@@ -385,15 +385,18 @@ void loop()
         if (currentLine.endsWith("GET /v2"))
         {
           potenciaVentiladorDesejada = 2;
+          clicou = false;
         }
 
         if(currentLine.endsWith("GET /v1"))
         {
           potenciaVentiladorDesejada = 1;
+          clicou = false;
         }
 
         if(currentLine.endsWith("GET /v0")){
           potenciaVentiladorDesejada = 0;
+          clicou = true;
         }
 
         if(currentLine.endsWith("GET /info")){
@@ -414,9 +417,7 @@ void loop()
     }
     client.stop();
     Serial.println("Desconectado.");
+  }else{
+    Serial.print(".");
   }
-
-
-
-  delay(500);
 }
