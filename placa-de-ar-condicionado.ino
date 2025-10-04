@@ -7,7 +7,9 @@
 #define pino_ventilador_baixo 18
 #define pino_ventilador_alto 19
 
-const char* ssid = "SSID_REDE"; //ssid da rede
+
+
+const char* ssid = "SUA_REDE"; //ssid da rede
 const char* password =  "SENHA"; //senha da rede
 WiFiServer server(80);
 
@@ -60,11 +62,12 @@ void desligarCompressor(){
 
 
 const int intervalo_compressor = 90000; //milissegundos
-int ultimaTrocaCompressor = 0;
+int ultimaTrocaCompressor = -90000;
 bool arCondicionadoLigado = false;
 
 bool trocarEstadoCompressor(int agora){
-  if (agora - ultimaTrocaCompressor > intervalo_compressor){
+  if (agora - ultimaTrocaCompressor >= intervalo_compressor){
+    ultimaTrocaCompressor = agora;
     return true;
   }
 
@@ -195,165 +198,88 @@ void loop()
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println();
-            client.print("<!DOCTYPE html>");
-            client.print("<html lang=\"pt-BR\">");
-            client.print("<head>");
+            client.print("<!DOCTYPE html><html lang=\"pt-BR\"><head>");
             client.print("<meta charset=\"UTF-8\">");
-            client.print("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-            client.print("<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200\" />");
-
-            // configuração de estilo do site
-            client.print("<style type=\"text/css\">* { margin: 0; padding: 0; color: white; }  body{ background-color: black; background-size: cover;");
-            client.print("font-family: Arial, Helvetica, sans-serif; }  .main { display: flex; flex-direction: column; justify-content: space-between;");
-            client.print("background-color: #131819; height: 100%; }  .display #on-off{ position: absolute; padding: 5%; font-weight: normal; }");
-            client.print(".display .temperatura{ display: flex; justify-content: center; align-items: center; margin-top: 30px; }");
-            client.print(".display .temperatura #temp{ font-size: 150px; font-weight: bold; }  .display .temperatura #cesius{ position: absolute;");
-            client.print("font-size: 30px; margin-bottom: 75px; margin-left: 200px; font-weight: normal; }  .display #info-estado{"); 
-            client.print("position: absolute; font-size: 25px; margin-bottom: -75px; margin-left: 300px; font-weight: normal; }");
-            client.print(".display .textInfo-box{ display: flex; flex-direction: column; margin-left: 25%; margin-bottom: 20px; }");
-            client.print(".display .textInfo{ font-size: 1.5rem; font-weight: normal; }  .display .textInfo-box .textInfo .refresh{position: absolute;");
-            client.print("margin-left: 15px;color: blue;} .estado, .ajusteTemp{ padding: 5px; height: 100px; display: flex; justify-content: space-evenly;");
-            client.print("align-items: center; text-align: center; background-color: black; border-bottom: 2px solid #131819; }  .estado .icon-box { width: 50%; }");
-            client.print(".estado .icon-box.right-border{ border-right: 1px solid #131819; }  .estado .icon-box.left-border{ border-left: 1px solid #131819; }");
-            client.print(".estado .icon, .ajusteTemp .icon{ font-size: 100px; }  .estado .icon-box .text-estado{ position: absolute; margin: 40px 0; font-size: 30px;");
-            client.print("display: none; }  .estado .icon-box .text-estado.text-quente{ background: linear-gradient(75deg, red 3.5%, yellow 95%); background-clip: text;");
-            client.print("-webkit-background-clip: text; -webkit-text-fill-color: transparent; }  .estado .icon-box .text-estado.text-frio{ margin-left: 25px;");
-            client.print("background: linear-gradient(75deg, white 3.5%, blue 95%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }");
-            client.print(".estado .icon.frio:hover + .text-frio{ display: inline; }  .estado .icon.quente:hover + .text-quente{ display: inline; }  .ajusteTemp .info-temp{");
-            client.print("font-size: 24px; }.ajust-left{ margin-left: 25px; }  .ajust-right{ margin-right: 25px; }  .ajusteTemp .aumentar .text-temp, .ajusteTemp .diminuir ");
-            client.print(".text-temp{ position: absolute; margin: 40px 0; font-size: 30px; display: none; }  .ajusteTemp .icon.icon-aumentar:hover + .text-aumentar{");
-            client.print("display: inline; }  .ajusteTemp .icon.icon-diminuir:hover + .text-diminuir{ display: inline; }  .velocidades{ display: flex; justify-content: space-evenly;");
-            client.print("align-items: center; height: 135px; font-size: 24px; background-color: black; }  .velocidades .radio, .velocidades .ajust-radio{ margin-right: 10px;");
-            client.print("cursor: pointer; } @media screen and (max-width: 450px){ .display #info-estado{ display: none; }  .display{ padding-top: 20px; }  .display .textInfo-box{");
-            client.print("margin-left: 0; }  .display .textInfo{ font-size: 1.2rem; }  .estado .icon.frio:hover + .text-frio, .estado .icon.quente:hover + .text-quente, .ajusteTemp");
-            client.print(".icon.icon-aumentar:hover + .text-aumentar, .ajusteTemp .icon.icon-diminuir:hover + .text-diminuir { display: none; pointer-events: none; }");
-            client.print(".velocidades{ flex-direction: column; justify-content: space-between; height: auto; }  .velocidades .radio{ margin-right: 50px; }  .velocidades");
-            client.print(".ajust-radio { margin: 35px 15px 35px 0; } }  @media screen and (min-width:450px) and (max-width: 600px){ .display{ padding-top: 20px; }  .display");
-            client.print(".textInfo-box{ margin-left: 25px; }  .display .textInfo{ font-size: 1.2rem; }  .estado .icon.frio:hover + .text-frio, .estado .icon.quente:hover +");
-            client.print(".text-quente, .ajusteTemp .icon.icon-aumentar:hover + .text-aumentar,.ajusteTemp .icon.icon-diminuir:hover + .text-diminuir {display: none;");
-            client.print("pointer-events: none;}.velocidades{flex-direction: column;justify-content: space-between;height: auto;}.velocidades .radio{margin-right: 175px;}");
-            client.print(".velocidades .ajust-radio {margin: 35px 15px 35px 0;}}@media screen and (min-width: 600px) and (max-width: 900px){.display .textInfo-box{");
-            client.print("margin-left: 25px;}.ajusteTemp .icon.icon-aumentar:hover + .text-aumentar,.ajusteTemp .icon.icon-diminuir:hover + .text-diminuir {display: none;");
-            client.print("pointer-events: none;}}@media screen and (min-width: 900px) and (max-width: 1100px){.display .textInfo-box{margin-left: 100px;}}");
-            client.print("@media screen and (min-width: 1100px) and (max-width: 1300px){.display .textInfo-box{margin-left: 150px;}}</style>");
-
+            client.print("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
+            client.print("<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200\"/>");
             client.print("<title>Controle Ar Condicionado</title>");
+
+            /* ===== CSS Responsivo ===== */
+            client.print("<style>");
+            client.print(":root{--bg:#000;--panel:#131819;--text:#fff;--muted:#8aa0a3;--btn:#444;--radius:12px;");
+            client.print("--fs-xxl:clamp(3rem,10vw,9rem);--fs-xl:clamp(1.25rem,3.5vw,2rem);--fs-lg:clamp(1rem,2.8vw,1.5rem);");
+            client.print("--fs-md:clamp(0.95rem,2.2vw,1.15rem);--fs-sm:clamp(0.85rem,1.9vw,1rem);--gap:clamp(12px,2.5vw,20px);}");
+            client.print("*{box-sizing:border-box;}html,body{height:100%;}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:var(--bg);}");
+            client.print(".main{min-height:100vh;display:flex;flex-direction:column;gap:var(--gap);background:var(--panel);padding:clamp(12px,3vw,24px);}");
+            client.print(".display{display:flex;flex-direction:column;gap:clamp(8px,2vw,12px);}#on-off{font-size:var(--fs-lg);font-weight:600;margin:0;color:var(--muted);}");
+            client.print(".temperatura{display:flex;align-items:flex-end;justify-content:center;gap:clamp(8px,2.5vw,16px);padding:clamp(8px,2.5vw,16px);border-radius:var(--radius);background:#0c1011;}");
+            client.print("#temp{font-size:var(--fs-xxl);line-height:1;font-weight:800;margin:0;}#celsius{font-size:clamp(1.2rem,4vw,2rem);margin:0 0 clamp(8px,1.8vw,12px) 0;color:var(--muted);font-weight:600;}");
+            client.print(".textInfo{font-size:var(--fs-lg);text-align:center;margin:clamp(8px,2vw,16px) 0 0 0;font-weight:500;}");
+            client.print(".ajusteTemp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gap);} .btn{display:flex;align-items:center;justify-content:center;gap:10px;");
+            client.print("padding:clamp(10px,3vw,14px);background:var(--btn);border-radius:var(--radius);text-decoration:none;color:var(--text);font-size:var(--fs-lg);font-weight:600;min-height:52px;transition:transform .08s ease,opacity .15s ease;user-select:none;-webkit-tap-highlight-color:transparent;}");
+            client.print(".btn:active{transform:scale(.98);opacity:.9;} .icon{font-size:clamp(28px,6vw,40px);}");
+            client.print(".velocidades{display:flex;flex-wrap:wrap;gap:var(--gap);justify-content:center;align-items:center;background:#0b0f10;padding:clamp(10px,3vw,16px);border-radius:var(--radius);}");
+            client.print("input[type=radio]{position:absolute;opacity:0;pointer-events:none;} .radio{display:flex;align-items:center;gap:10px;padding:clamp(10px,2.8vw,14px) clamp(14px,4vw,18px);border-radius:var(--radius);text-decoration:none;color:var(--text);background:#1a2224;font-size:var(--fs-md);min-height:48px;transition:background .15s ease,transform .08s ease;}");
+            client.print(".radio:active{transform:scale(.98);} .radio:hover{background:#213034;} .velocidades a{text-decoration:none;} .row{display:flex;flex-wrap:wrap;gap:var(--gap);align-items:center;justify-content:center;} .grow{flex:1 1 220px;}");
+            client.print("@media(max-width:860px){.ajusteTemp{grid-template-columns:repeat(2,minmax(0,1fr));}}");
+            client.print("@media(max-width:480px){.ajusteTemp{grid-template-columns:1fr;}.textInfo{font-size:var(--fs-md);}}");
+            client.print("</style>");
             client.print("</head>");
 
-            // o conteúdo do cabeçalho HTTP
-            client.print("<body>");
-            client.print("<div class=\"main\">");
-            client.print("<div class=\"display\">");
-            
-            
-            if (arCondicionadoLigado)
-            {
-              client.print("<h1 id=\"on-off\">Ligado</h1>");
-            }
-            else
-            {
-              client.print("<h1 id=\"on-off\">Desligado</h1>");
-            }
+            /* ===== BODY ===== */
+            client.print("<body><div class=\"main\"><div class=\"display\">");
 
-            client.print("<div class=\"temperatura\">");
-            client.print("<h1 id=\"temp\">");
-            if (arCondicionadoLigado)
-            {
-              client.print(temperaturaDesejada);
-            }
-            else
-            {
-              client.print("--");
-            }
+            /* ON/OFF */
+            client.print("<h1 id=\"on-off\">");
+            client.print(arCondicionadoLigado ? "Ligado" : "Desligado");
             client.print("</h1>");
-            client.print("<h1 id=\"celsius\">°C</h1>");
-            client.print("<hr>");
+
+            /* TEMPERATURA */
+            client.print("<div class=\"temperatura\"><h1 id=\"temp\">");
+            if (arCondicionadoLigado) { client.print(temperaturaDesejada); } else { client.print("--"); }
+            client.print("</h1><h1 id=\"celsius\">°C</h1></div>");
+
+            /* MODO DE VENTILAÇÃO */
             client.print("<h1 class=\"textInfo\">Modo de Ventilação: ");
-            
-            if(arCondicionadoLigado)
-            {
-              if (potenciaVentiladorDesejada == 1)
-              {
-                client.print("Baixa");
-              }else if(potenciaVentiladorDesejada == 2)
-              {
-                client.print("Alta");
-              }else if(potenciaVentiladorDesejada == 0)
-              {
-                client.print("Desligado");
-              }
-            }
-            else
-            {
+            if (arCondicionadoLigado) {
+              if (potenciaVentiladorDesejada == 1)      client.print("Baixa");
+              else if (potenciaVentiladorDesejada == 2) client.print("Alta");
+              else                                      client.print("Desligado");
+            } else {
               client.print("Desligado");
             }
+            client.print("</h1></div>");
 
-            client.print("</h1>");
-            client.print("</div>"); //DIV TEMPERATURA
-            client.print("</div>"); //DIV DISPLAY
-            client.print("</div>"); //DIV MAIN
-
-            client.print("<div class=\"ajusteTemp\">"); 
-
-            client.print("<div style='text-align:center; margin:20px;'>");
-            client.print("<a href=\"/ligar-desligar\" style='font-size:24px; color:white; text-decoration:none; background:#444; padding:10px 20px; border-radius:8px;'>");
+            /* AÇÕES PRINCIPAIS */
+            client.print("<div class=\"ajusteTemp\">");
+            /* Ligar/Desligar */
+            client.print("<a class=\"btn\" href=\"/ligar-desligar\"><span class=\"material-symbols-sharp icon\">power_settings_new</span><span>");
             client.print(arCondicionadoLigado ? "Desligar" : "Ligar");
-            client.print("</a>");
+            client.print("</span></a>");
+            /* Info */
+            client.print("<a class=\"btn\" href=\"/info\"><span class=\"material-symbols-sharp icon\">info</span><span>Info</span></a>");
+            /* Aumentar */
+            client.print("<a class=\"btn\" href=\"/mais\"><span class=\"material-symbols-sharp icon\">add</span><span>Aumentar</span></a>");
+            /* Diminuir */
+            client.print("<a class=\"btn\" href=\"/menos\"><span class=\"material-symbols-sharp icon\">remove</span><span>Diminuir</span></a>");
             client.print("</div>");
 
-            client.print("<div style='text-align:center; margin:20px;'>");
-            client.print("<a href=\"/info\" style='font-size:24px; color:white; text-decoration:none; background:#444; padding:10px 20px; border-radius:8px;'>");
-            client.print("Info.");
-            client.print("</a>");
+            /* VELOCIDADES */
+            client.print("<div class=\"velocidades\">");
+            /* V1 */
+            client.print("<a href=\"/v1\" class=\"radio grow\"><input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio1\">");
+            client.print("<span class=\"material-symbols-sharp\">air</span><span>Velocidade Baixa</span></a>");
+            /* V2 */
+            client.print("<a href=\"/v2\" class=\"radio grow\"><input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio2\">");
+            client.print("<span class=\"material-symbols-sharp\">air</span><span>Velocidade Alta</span></a>");
+            /* V0 */
+            client.print("<a href=\"/v0\" class=\"radio grow\"><input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio3\">");
+            client.print("<span class=\"material-symbols-sharp\">air</span><span>Ventilador Desligado</span></a>");
             client.print("</div>");
 
-
-            client.print("<div class=\"aumentar\">");
-            client.print("<a href=\"/mais\">");
-            client.print("<span class=\"material-symbols-sharp icon ajust-left icon-aumentar\">");
-            client.print("add");
-            client.print("</span>");
-            client.print("<span class=\"text-temp text-aumentar\">Aumentar</span>");
-            client.print("</a>");
-            client.print("</div>");
-
-            //client.print("<div class=\"info-temp\"></div>");//div info-temp abre e fecha
-
-            client.print("<div class=\"diminuir\">"); //div botao diminuir
-            client.print("<a href=\"/menos\">");
-            client.print("<span class=\"material-symbols-sharp icon ajust-right icon-diminuir\">");
-            client.print("remove");
-            client.print("</span>");
-            client.print("<span class=\"text-temp text-diminuir\">Diminuir</span>");
-            client.print("</a>");
-            client.print("</div>"); //div botao diminuir off
-
-            client.print("</div>"); //finaliza div 
-
-            client.print("<div class=\"velocidades\">"); //v1
-            client.print("<a href=\"/v1\" class=\"radio\">");
-            client.print("<input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio1\">");
-            client.print("Velocidade Baixa.");
-            client.print("</a>");
-            //v2
-            client.print("<a href=\"/v2\" class=\"radio\">");
-            client.print("<input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio2\" >");
-            client.print("Velocidade Alta.");
-            client.print("</a>");
-            //v0
-            client.print("<a href=\"/v0\" class=\"radio\">");
-            client.print("<input class=\"ajust-radio\" type=\"radio\" name=\"radio\" id=\"radio2\" >");
-            client.print("Ventilador desligado.");
-            client.print("</a>");
-
-
-
-            client.print("</div>"); //div velocidades
-
-            client.print("</body>");
-            client.print("</html>");
-
+            client.print("</div></body></html>");
             client.println();
+
 
             break;
           } 
@@ -366,7 +292,7 @@ void loop()
           currentLine += c;
         }
 
-        //Métodos 
+        //CHAMADAS DA INTERAÇÃO DO USUÁRIO
         if (currentLine.endsWith("GET /ligar-desligar")) 
         { 
           arCondicionadoLigado = !arCondicionadoLigado;
@@ -420,4 +346,5 @@ void loop()
   }else{
     Serial.print(".");
   }
+
 }
