@@ -15,13 +15,11 @@ WiFiServer server(80);
 
 
 OneWire onewire(pino_sensor_temperatura);
-DallasTemperature sensor(&onewire);
+DallasTemperature sensors(&onewire);
 
 float lerTemperatura() {
-  sensor.requestTemperatures();
-  DeviceAddress sensor1Address;
-  sensor.getAddress(sensor1Address, 0);
-  float temperatura = sensor.getTempC(sensor1Address);
+  sensors.requestTemperatures();
+   float temperatura = sensors.getTempCByIndex(0);
   return temperatura;
 }
 
